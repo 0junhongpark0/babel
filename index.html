@@ -1709,12 +1709,24 @@ function lockResultScreen() {
     function nextCard() { fcIndex = (fcIndex + 1) % filteredDict.length; updateFlashcard(); }
     function prevCard() { fcIndex = (fcIndex - 1 + filteredDict.length) % filteredDict.length; updateFlashcard(); }
     
-    function updateFlashcard() {
-        document.getElementById('fcPer').innerText = filteredDict[fcIndex].p;
-        document.getElementById('fcPron').innerText = filteredDict[fcIndex].r ? `/${filteredDict[fcIndex].r}/` : '';
-        document.getElementById('fcMean').innerText = filteredDict[fcIndex].k;
-        document.getElementById('fcMean').classList.add('fc-content-hidden'); 
+function updateFlashcard() {
+    const word = filteredDict[fcIndex];
+
+    document.getElementById('fcPer').innerText = word.p;
+
+    const pronEl = document.getElementById('fcPron');
+
+    if (word.r) {
+        pronEl.innerText = `/${word.r}/`;
+        pronEl.style.display = 'block';
+    } else {
+        pronEl.innerText = '';
+        pronEl.style.display = 'none';
     }
+
+    document.getElementById('fcMean').innerText = word.k;
+    document.getElementById('fcMean').classList.add('fc-content-hidden');
+}
 
     function downloadCSV() {
         if(!WORD_CSV_URL) {
