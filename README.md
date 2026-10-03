@@ -1,3 +1,3 @@
-# farsi
-An interactive web application for korean beginners learning Farsi<br>
+# Babel
+An interactive web app for Koreans learning foreign languages<br>
 JhP. All Rights Reserved.
