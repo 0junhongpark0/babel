@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>페르시아어 단어장</title>
+    <title>바벨탑 재건사업</title>
     
     <link href="https://cdn.jsdelivr.net/gh/rastikerdar/sahel-font@v3.4.0/dist/font-face.css" rel="stylesheet" type="text/css" />
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;700&family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;700&family=Noto+Sans+JP:wght@400;700&family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
@@ -67,9 +67,17 @@ body {
         .btn-home { background: #ffffff; border: 2px solid #dee2e6; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; color: var(--primary); font-size: 1.1rem; }
         .btn-home:hover { background: #e9ecef; border-color: #adb5bd; }
         
-        header { background: var(--primary); color: white; padding: 25px; text-align: center; }
-        header h2 { font-size: 2.5rem; margin: 0; }
-        header p { margin-top: 15px; opacity: 0.8; font-size: 1.2rem; }
+header {
+    background: var(--primary);
+    color: white;
+    padding: 16px 25px;
+    text-align: center;
+}
+
+header h2 {
+    font-size: 2.5rem;
+    margin: 0;
+}
 
         .screen {
     display: none;
@@ -78,9 +86,24 @@ body {
     min-height: 0;
     overflow-y: auto;
 }
+
+#screen-home {
+    padding-top: 15px;
+}
+
+#screen-home.active {
+    display: flex;
+    flex-direction: column;
+}
+
+#screen-home .home-grid {
+    flex: 1;
+    grid-template-rows: repeat(2, minmax(0, 1fr));
+}
+
         .screen.active { display: block; }
 
-        .home-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin-top: 30px; width: 100%; }
+        .home-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin-top: 15px; width: 100%; }
         @media (max-width: 768px) { .home-grid { grid-template-columns: 1fr; } }
         
         .mode-card { background: #f8f9fa; border: 2px solid #e9ecef; border-radius: 12px; padding: 35px 20px; text-align: center; cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; justify-content: center; }
@@ -397,11 +420,75 @@ body {
             .btn-control { flex: 1; justify-content: center; padding: 12px; font-size: 1rem; }
         }
 
+/* =========================================================
+   언어 선택 UI
+   ========================================================= */
+
+.language-selector-wrap {
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.language-selector {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.language-btn {
+    min-width: 70px;
+    padding: 10px 18px;
+    border: 2px solid #ced4da;
+    border-radius: 8px;
+    background: #ffffff;
+    color: #495057;
+    font-size: 1.05rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.language-btn:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+.language-btn.active {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
+/* 언어가 아직 선택되지 않았을 때 게임 메뉴 비활성화 */
+.language-locked .home-grid {
+    opacity: 0.4;
+    filter: grayscale(0.5);
+    pointer-events: none;
+}
+
+/*
+   기존 게임 코드는 페르시아어를 기준으로 RTL을 직접 지정한다.
+   게임 함수를 건드리지 않기 위해,
+   LTR 언어에서는 CSS !important로 방향만 덮어쓴다.
+*/
+body[data-lang-direction="ltr"] .mcq-problem,
+body[data-lang-direction="ltr"] .mcq-btn,
+body[data-lang-direction="ltr"] .match-card,
+body[data-lang-direction="ltr"] .scramble-input-area,
+body[data-lang-direction="ltr"] .scramble-letters,
+body[data-lang-direction="ltr"] .letter-btn,
+body[data-lang-direction="ltr"] .vocab-per,
+body[data-lang-direction="ltr"] .card-per,
+body[data-lang-direction="ltr"] .mistake-item span {
+    direction: ltr !important;
+}
+
     </style>
 </head>
 <body>
 
-<div id="global-loading">
+<div id="global-loading" style="display:none;">
     <div class="spinner"></div>
     <h2 style="margin-top:20px; color:var(--primary);">단어장 데이터 연동 중...</h2>
 </div>
@@ -412,11 +499,17 @@ body {
     </div>
 
     <header id="main-header">
-        <h2>페르시아어 단어장</h2>
-        <p>게임으로 완벽하게 체화하는 단어 학습 공간</p>
+        <h2>바벨탑 재건사업</h2>
     </header>
 
-    <div id="screen-home" class="screen active">
+    <div id="screen-home" class="screen active language-locked">
+
+<div class="language-selector-wrap">
+    <div id="language-selector" class="language-selector">
+        <!-- LANGUAGE_CONFIG를 기준으로 버튼이 자동 생성됩니다. -->
+    </div>
+</div>
+
 <div class="home-grid">
             <div class="mode-card" onclick="showScreen('screen-dict');">
                 <i class="fas fa-book mode-icon"></i>
@@ -640,10 +733,98 @@ body {
 </div>
 
 <script>
-    // 단어장 링크
-    const WORD_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR7kygc158HJLii5s2jwGoCPNhNRyIoK0GJVM6oZUBMyfbI0FIi7lYd0XN4N6v2PYGxtq22AsBZ6yFX/pub?output=csv"; 
-    
-    let wordData = [];
+// =====================================================================
+// ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+// ★ 언어 설정 / CSV 링크
+// ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+//
+// 앞으로 새로운 언어를 추가하거나 CSV 링크를 바꿀 때는
+// 기본적으로 이 영역만 수정하면 됩니다.
+//
+// Ctrl + F 추천 검색어:
+//     "언어 설정"
+//     "CSV 주소"
+//
+// CSV 형식은 모든 언어가 동일해야 합니다.
+//
+//     A열 = 외국어 단어
+//     B열 = 한국어 뜻
+//     C열 = 발음 / 읽기
+//
+// 예:
+//     کتاب   | 책   | ketâb
+//     食べる | 먹다 | たべる
+//     apple  | 사과 | ˈæpəl
+//
+// 새 언어 추가 방법:
+// 기존 항목 하나를 복사한 뒤
+// code / name / csvUrl / direction / font 만 수정하세요.
+//
+// direction:
+//     일반적인 언어 = "ltr"
+//     페르시아어, 아랍어 등 = "rtl"
+//
+// 버튼은 아래 배열 순서대로 자동 생성됩니다.
+// =====================================================================
+
+const LANGUAGE_CONFIG = [
+
+    {
+        code: "FA",
+        name: "페르시아어",
+
+        // ★ CSV 주소 ★
+        csvUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vR7kygc158HJLii5s2jwGoCPNhNRyIoK0GJVM6oZUBMyfbI0FIi7lYd0XN4N6v2PYGxtq22AsBZ6yFX/pub?gid=415354578&single=true&output=csv",
+
+        direction: "rtl",
+        font: "'Vazirmatn', 'Sahel', 'Noto Sans Arabic', sans-serif"
+    },
+
+    {
+        code: "JP",
+        name: "일본어",
+
+        // ★ CSV 주소 ★
+        csvUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vR7kygc158HJLii5s2jwGoCPNhNRyIoK0GJVM6oZUBMyfbI0FIi7lYd0XN4N6v2PYGxtq22AsBZ6yFX/pub?gid=2025117463&single=true&output=csv",
+
+        direction: "ltr",
+        font: "'Noto Sans JP', 'Noto Sans KR', sans-serif"
+    },
+
+    {
+        code: "EN",
+        name: "영어",
+
+        // ★ CSV 주소 ★
+        csvUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vR7kygc158HJLii5s2jwGoCPNhNRyIoK0GJVM6oZUBMyfbI0FIi7lYd0XN4N6v2PYGxtq22AsBZ6yFX/pub?gid=243956599&single=true&output=csv",
+
+        direction: "ltr",
+        font: "'Noto Sans KR', Arial, sans-serif"
+    }
+
+];
+
+// =====================================================================
+// ★ 언어 설정 끝
+// =====================================================================
+
+
+// 현재 선택된 언어
+// 처음에는 아무 언어도 선택하지 않습니다.
+let currentLanguage = null;
+
+
+// 기존 downloadCSV()와의 호환성을 위해 유지합니다.
+// 선택한 언어의 CSV 주소가 자동으로 들어갑니다.
+let WORD_CSV_URL = "";
+
+
+// 한 번 불러온 언어는 페이지가 열려 있는 동안 다시 다운로드하지 않습니다.
+const wordCache = {};
+
+
+// 기존 게임 전체가 사용하는 공통 단어 데이터입니다.
+let wordData = [];
 
     function parseCSV(str) {
         const arr = []; let quote = false;
@@ -666,50 +847,260 @@ body {
         document.getElementById('global-loading').style.display = 'none';
     }
 
-window.onload = async function() {
+// =========================================================
+// 다국어 단어장 로딩 관리
+// =========================================================
+
+function showGlobalLoading() {
+    document.getElementById('global-loading').style.display = 'flex';
+}
+
+
+// LANGUAGE_CONFIG를 기준으로 언어 버튼 자동 생성
+function renderLanguageButtons() {
+
+    const container =
+        document.getElementById('language-selector');
+
+    container.innerHTML = '';
+
+    LANGUAGE_CONFIG.forEach(lang => {
+
+        const button =
+            document.createElement('button');
+
+        button.type = 'button';
+        button.className = 'language-btn';
+        button.dataset.lang = lang.code;
+        button.innerText = lang.code;
+
+        button.onclick = () => {
+            selectLanguage(lang.code);
+        };
+
+        container.appendChild(button);
+    });
+}
+
+
+// 현재 선택 언어 버튼 표시
+function setActiveLanguageButton(code) {
+
+    document
+        .querySelectorAll('.language-btn')
+        .forEach(button => {
+
+            button.classList.toggle(
+                'active',
+                button.dataset.lang === code
+            );
+
+        });
+}
+
+
+// 선택 언어의 폰트 / 문자 방향 적용
+function applyLanguageAppearance(config) {
+
+    document.documentElement.style.setProperty(
+        '--persian-font',
+        config.font
+    );
+
+    document.body.dataset.langDirection =
+        config.direction;
+}
+
+
+// 실제 CSV 다운로드 및 파싱
+async function loadLanguageData(config) {
+
+    // 이미 한 번 불러온 언어라면 캐시 사용
+    if (wordCache[config.code]) {
+        return wordCache[config.code];
+    }
+
+    const res =
+        await fetch(config.csvUrl, {
+            cache: 'no-store'
+        });
+
+    if (!res.ok) {
+        throw new Error(
+            `HTTP 오류: ${res.status}`
+        );
+    }
+
+    const csvText =
+        await res.text();
+
+    const parsed =
+        parseCSV(csvText);
+
+    if (parsed.length <= 1) {
+        throw new Error(
+            "단어장 데이터가 비어 있습니다."
+        );
+    }
+
+    const loadedWords = [];
+
+    for (let i = 1; i < parsed.length; i++) {
+
+        if (parsed[i][0]) {
+
+            loadedWords.push({
+
+                // 기존 게임 코드를 건드리지 않기 위해
+                // 기존 p / k / r 데이터 구조를 그대로 유지
+                p: parsed[i][0].trim(),
+
+                k: parsed[i][1]
+                    ? parsed[i][1].trim()
+                    : '',
+
+                r: parsed[i][2]
+                    ? parsed[i][2].trim()
+                    : ''
+            });
+        }
+    }
+
+    if (loadedWords.length === 0) {
+        throw new Error(
+            "사용 가능한 단어가 없습니다."
+        );
+    }
+
+    wordCache[config.code] =
+        loadedWords;
+
+    return loadedWords;
+}
+
+
+// 언어 선택
+async function selectLanguage(code) {
+
+    const config =
+        LANGUAGE_CONFIG.find(
+            lang => lang.code === code
+        );
+
+    if (!config) {
+        return;
+    }
+
+    // 이미 현재 사용 중인 언어라면 아무것도 하지 않음
+    if (currentLanguage === code) {
+        return;
+    }
+
+    if (!config.csvUrl.trim()) {
+
+        alert(
+            `${config.name}의 CSV 주소가 설정되지 않았습니다.\n\n` +
+            `HTML에서 "CSV 주소"를 검색하여 주소를 입력하세요.`
+        );
+
+        return;
+    }
+
+    const homeScreen =
+        document.getElementById('screen-home');
+
+    const hadPreviousLanguage =
+        currentLanguage !== null;
+
+    // 로딩 중에는 게임 메뉴 잠금
+    homeScreen.classList.add(
+        'language-locked'
+    );
+
+    showGlobalLoading();
+
     try {
-        if (!WORD_CSV_URL) {
-            throw new Error("단어장 URL이 설정되지 않았습니다.");
+
+        const loadedWords =
+            await loadLanguageData(config);
+
+        /*
+           캐시 원본을 직접 wordData로 쓰지 않고 복사합니다.
+           기존의 "단어 섞기" 기능이 wordData 순서를 바꾸기 때문입니다.
+        */
+        wordData =
+            loadedWords.map(word => ({
+                ...word
+            }));
+
+        currentLanguage =
+            config.code;
+
+        // 기존 CSV 다운로드 기능과 연결
+        WORD_CSV_URL =
+            config.csvUrl;
+
+        applyLanguageAppearance(
+            config
+        );
+
+        // 이전 언어 검색어 제거
+        const searchInput =
+            document.getElementById(
+                'searchInput'
+            );
+
+        if (searchInput) {
+            searchInput.value = '';
         }
 
-        const res = await fetch(WORD_CSV_URL, { cache: 'no-store' });
-
-        if (!res.ok) {
-            throw new Error(`HTTP 오류: ${res.status}`);
-        }
-
-        const csvText = await res.text();
-        const parsed = parseCSV(csvText);
-
-        if (parsed.length <= 1) {
-            throw new Error("단어장 데이터가 비어 있습니다.");
-        }
-
-        wordData = [];
-
-        for (let i = 1; i < parsed.length; i++) {
-            if (parsed[i][0]) {
-                wordData.push({
-                    p: parsed[i][0].trim(),
-                    k: parsed[i][1] ? parsed[i][1].trim() : '',
-                    r: parsed[i][2] ? parsed[i][2].trim() : ''
-                });
-            }
-        }
-
-        if (wordData.length === 0) {
-            throw new Error("사용 가능한 단어가 없습니다.");
-        }
-
+        // 기존 단어장 렌더링 함수 그대로 사용
         renderDict();
 
+        setActiveLanguageButton(
+            config.code
+        );
+
+        homeScreen.classList.remove(
+            'language-locked'
+        );
+
     } catch (e) {
+
         console.error(e);
-        alert("단어 데이터를 가져오지 못했습니다. 단어장 링크와 데이터를 다시 확인하세요.");
+
+        alert(
+            `${config.name} 단어 데이터를 가져오지 못했습니다.\n` +
+            `CSV 주소와 데이터를 다시 확인하세요.`
+        );
+
+        /*
+           기존 언어를 사용 중이었다면
+           실패했다고 기존 게임까지 잠그지는 않습니다.
+        */
+        if (hadPreviousLanguage) {
+
+            homeScreen.classList.remove(
+                'language-locked'
+            );
+        }
 
     } finally {
+
         hideGlobalLoading();
     }
+}
+
+
+// 최초 접속
+window.onload = function() {
+
+    // FA / JP / EN 버튼만 생성
+    // 어떠한 언어도 자동 선택하지 않음
+    renderLanguageButtons();
+
+    // 안전하게 로딩창 제거
+    hideGlobalLoading();
 };
 
 let selectedGameAmount = 0;
@@ -1330,7 +1721,11 @@ function lockResultScreen() {
             alert("다운로드할 수 있는 파일이 설정되어 있지 않습니다.");
             return;
         }
-        alert("⚠️ [필독 주의사항]\n\n다운받은 csv 파일을 더블클릭하여 엑셀로 열면 페르시아어가 100% 깨집니다.\n\n반드시 구글 스프레드시트를 열고 [파일] -> [가져오기] 메뉴를 통해 해당 파일을 여세요.");
+        alert(
+    "⚠️ [필독 주의사항]\n\n" +
+    "다운받은 CSV 파일을 Excel에서 직접 열 경우 외국어 문자가 깨질 수 있습니다.\n\n" +
+    "문제가 발생하면 Google 스프레드시트에서 [파일] → [가져오기]를 이용하세요."
+);
         window.open(WORD_CSV_URL, '_blank');
     }
 </script>
